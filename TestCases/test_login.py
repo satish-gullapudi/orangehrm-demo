@@ -95,3 +95,41 @@ def test_application_login_with_invalid_data(setup):
         sys.exit()
     
     log.info("---- LOGIN APPLICATION WITH INVALID DATA TEST COMPLETE -----")
+
+def test_login_page_footer_links(setup):
+    driver = setup
+    bp = BasePage(driver)
+    lp = LoginPage(driver)
+    log = bp.log
+    wait = WebDriverWait(driver, 10)
+    err_count = 0
+    main_window = driver.current_window_handle
+
+    log.info("---- FOOTER LINKS TEST BEGINS -----")
+    def validate_footer_links(xpath, expected):
+        nonlocal err_count
+        ele = rc(lp.section, xpath)
+        wait.until(EC.element_to_be_clickable((By.XPATH, ele)))
+        handles = driver.window_handles
+        bp.click_element(lp.section, xpath)
+        wait.until(EC.new_window_is_opened(handles))
+        handles = driver.window_handles
+        new_window = handles[1]
+        driver.switch_to.window(new_window)
+        actual = driver.current_url
+
+        if actual != expected:
+            log.error(f"Expected to launch '{expected}' in new window but actual '{actual}'")
+            err_count += 1
+        driver.close()
+        driver.switch_to.window(main_window)
+        return err_count
+    
+    err_count += validate_footer_links("footer_links_linkedin_xpath", "https://www.linkedin.com/company/orangehrm")
+    err_count += validate_footer_links("footer_links_facebook_xpath", "https://www.facebook.com/OrangeHRM/")
+    err_count += validate_footer_links("footer_links_twitter_xpath", "https://x.com/orangehrm?lang=en")
+    err_count += validate_footer_links("footer_links_youtube_xpath", "https://www.youtube.com/c/OrangeHRMInc")
+
+    if err_count != 0:
+        sys.exit()
+    log.info("---- FOOTER LINKS TEST COMPLETE -----")
