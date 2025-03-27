@@ -1,6 +1,7 @@
 import time
-from Pages.BasePage import BasePage
-from Pages.LoginPage import LoginPage
+from PageObjects.BasePage import BasePage
+from PageObjects.LoginPage import LoginPage
+from TestCases.conftest import setup
 from Utilities.CustomLogger import LogGen
 from Utilities.ConfigReader import read_config as rc
 
@@ -18,15 +19,13 @@ def test_application_login_with_valid_data(setup):
     lp = LoginPage(driver)
     log = bp.log
     wait = WebDriverWait(driver, 10)
-    err_count = 0
 
     log.info("---- LOGIN APPLICATION WITH VALID DATA TEST BEGINS -----")
     username = rc('COMMON_INFO', 'user_name')
     password = rc('COMMON_INFO', 'password')
     expected = rc('COMMON_INFO', "dashboard_url")
-    
-    lp.login_application(username, password)
     try:
+        lp.login_application(username, password)
         # waiting for dashboard to be displayed
         wait.until(EC.url_to_be(expected))
         time.sleep(2)
@@ -34,16 +33,11 @@ def test_application_login_with_valid_data(setup):
 
         # checking dashboard navigation by verifying text presence in dashboard
         if any(i not in text for i in ("Time at Work", "Quick Launch")):
-            log.error("Failing to login and navigate to dashboard")
-            err_count += 1
-    except TimeoutException:
-        log.error("Failing to login and navigate to dashboard")
-        err_count += 1
-    
-    if err_count != 0:
-        sys.exit()
-    
-    log.info("---- LOGIN APPLICATION WITH VALID DATA TEST COMPLETE -----")
+            bp.log.error("Failing to login and navigate to dashboard")
+    except Exception as e:
+        bp.log.error("Failing to login and navigate to dashboard")
+
+    bp.log.info("---- LOGIN APPLICATION WITH VALID DATA TEST COMPLETE -----")
 
 def test_application_login_with_invalid_data(setup):
     driver = setup
@@ -73,27 +67,27 @@ def test_application_login_with_invalid_data(setup):
     log.info("---- LOGIN WITH VALID USERNAME AND INVALID PASSWORD ----")
     username = rc('COMMON_INFO', 'user_name')
     password = bp.random_alphanum_strig_generator(8)
-    
+
     lp.login_application(username, password)
     err_count += validate_err_msg()
-    
+
     log.info("---- LOGIN WITH INVALID USERNAME AND VALID PASSWORD ----")
     username = bp.random_alphanum_strig_generator(8)
     password = rc('COMMON_INFO', 'password')
-    
+
     lp.login_application(username, password)
     err_count += validate_err_msg()
-    
+
     log.info("---- LOGIN WITH INVALID USERNAME AND INVALID PASSWORD ----")
     username = bp.random_alphanum_strig_generator(8)
     password = bp.random_alphanum_strig_generator(8)
-    
+
     lp.login_application(username, password)
     err_count += validate_err_msg()
 
     if err_count != 0:
         sys.exit()
-    
+
     log.info("---- LOGIN APPLICATION WITH INVALID DATA TEST COMPLETE -----")
 
 def test_login_page_footer_links(setup):

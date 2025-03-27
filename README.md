@@ -9,5 +9,6 @@ PREREQUISITIES:
 
 TEST EXECUTION INSTRUCTIONS:
 ----------------------------
-1. Run below command in the terminal to begin test execution
-            pytest -v -s
+1. This project is integrated with streamlit library which gives UI to the project where uesr can select required tests and execute them.
+2. Please run below command
+3. streamlit run main.py
