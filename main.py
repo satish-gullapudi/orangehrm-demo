@@ -36,10 +36,27 @@ def run_selected_tests(selected_tests):
         st.text(f"Running {test}...\n{result.stdout}")
         time.sleep(0.5)  # Simulate delay to make cancellation observable
 
+# def execute_tests(selected_tests):
+#     """Threaded function to execute tests."""
+#     execution_flag["cancel"] = False  # Reset cancel flag
+#     run_selected_tests(selected_tests)
+
 def execute_tests(selected_tests):
-    """Threaded function to execute tests."""
-    execution_flag["cancel"] = False  # Reset cancel flag
-    run_selected_tests(selected_tests)
+    """Executes the selected tests and signals completion."""
+    try:
+        # Simulate running tests (replace with your actual test execution logic)
+        # for test in selected_tests:
+        #     st.write(f"Running test: {test}")  # Display each test being run
+        #     time.sleep(1)  # Simulate test execution time
+        run_selected_tests(selected_tests)
+
+        st.session_state.test_execution_complete = True # Signal completion using session state
+    except Exception as e:
+        st.error(f"An error occurred during test execution: {e}")
+        st.session_state.test_execution_complete = True # Still set to true to avoid indefinite hang
+
+if "test_execution_complete" not in st.session_state:
+    st.session_state.test_execution_complete = False
 
 # Streamlit UI
 st.title("Test Automation Runner")
@@ -63,10 +80,16 @@ col1, col2 = st.columns(2)
 if col1.button("Run Selected Tests"):
     if selected_tests:
         st.write(f"Running {len(selected_tests)} test(s)...")
+        st.session_state.test_execution_complete = False # Reset before starting new tests
         # Run tests in a separate thread
         Thread(target=execute_tests, args=(selected_tests,), daemon=True).start()
     else:
         st.warning("No tests selected!")
+
+# Check for test completion periodically (using a placeholder for demonstration)
+if st.session_state.test_execution_complete:
+    st.success("Test execution complete!")
+    del st.session_state.test_execution_complete # Clean up to allow running again
 
 # Cancel Execution Button
 if col2.button("Cancel Execution"):
