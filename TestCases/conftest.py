@@ -6,6 +6,7 @@ import subprocess
 
 from PageObjects.BasePage import BasePage as bp
 from Utilities.ConfigReader import read_config as rc
+from db_obj import dbobj as db
 
 # This checks virtual environment presence in project before session starts
 def pytest_sessionstart(session):
@@ -31,3 +32,4 @@ def setup():
 
     yield driver
     driver.quit()
+    db.conn.close()
